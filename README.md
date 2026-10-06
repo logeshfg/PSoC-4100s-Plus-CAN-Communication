@@ -95,7 +95,7 @@ git clone https://github.com/logeshfg/PSoC-4100s-Plus-CAN-Communication.git
 cd PSoC-4100s-Plus-CAN-Communication
 
 ```
-
+<center>
 <pre>
 
 ████████╗██╗  ██╗ █████╗ ███╗   ██╗██╗  ██╗    ██╗   ██╗ ██████╗ ██╗   ██╗
@@ -106,6 +106,7 @@ cd PSoC-4100s-Plus-CAN-Communication
    ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝       ╚═╝    ╚═════╝  ╚═════╝
 
 </pre>
+</center>
 
 
   
