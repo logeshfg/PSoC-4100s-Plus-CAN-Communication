@@ -1,0 +1,368 @@
+#include "project.h"
+#include <stdint.h>
+
+/* =========================================================
+   DHT22 READ
+   ========================================================= */
+
+static uint8 DHT22_Read(int16 *temperature10,
+                        uint16 *humidity10)
+{
+    uint8 data[5] = {0u, 0u, 0u, 0u, 0u};
+
+    uint8 i;
+    uint8 j;
+
+    uint16 timeout;
+    
+
+    uint8 irqState;
+
+
+    /* Start signal */
+    DHT_DATA_Write(0u);
+    CyDelay(2u);
+
+    /* Release the line */
+    DHT_DATA_Write(1u);
+    CyDelayUs(30u);
+
+
+    /* Disable interrupts for timing */
+    irqState = CyEnterCriticalSection();
+
+
+    /* -------------------------
+       DHT response LOW
+       ------------------------- */
+
+    timeout = 0u;
+
+    while (DHT_DATA_Read() != 0u)
+    {
+        CyDelayUs(1u);
+
+        if (++timeout > 150u)
+        {
+            CyExitCriticalSection(irqState);
+            return 0u;
+        }
+    }
+
+
+    /* -------------------------
+       DHT response HIGH
+       ------------------------- */
+
+    timeout = 0u;
+
+    while (DHT_DATA_Read() == 0u)
+    {
+        CyDelayUs(1u);
+
+        if (++timeout > 150u)
+        {
+            CyExitCriticalSection(irqState);
+            return 0u;
+        }
+    }
+
+
+    /* -------------------------
+       First data LOW
+       ------------------------- */
+
+    timeout = 0u;
+
+    while (DHT_DATA_Read() != 0u)
+    {
+        CyDelayUs(1u);
+
+        if (++timeout > 150u)
+        {
+            CyExitCriticalSection(irqState);
+            return 0u;
+        }
+    }
+
+
+    /* -------------------------
+       Read 40 bits
+       ------------------------- */
+
+    for (j = 0u; j < 5u; j++)
+    {
+        for (i = 0u; i < 8u; i++)
+        {
+            /* Wait for HIGH */
+            timeout = 0u;
+
+            while (DHT_DATA_Read() == 0u)
+            {
+                CyDelayUs(1u);
+
+                if (++timeout > 100u)
+                {
+                    CyExitCriticalSection(irqState);
+                    return 0u;
+                }
+            }
+
+
+            /*
+             * DHT22:
+             * about 26-28 us = 0
+             * about 70 us    = 1
+             *
+             * Sample at 40 us.
+             */
+            CyDelayUs(40u);
+
+            data[j] <<= 1u;
+
+            if (DHT_DATA_Read() != 0u)
+            {
+                data[j] |= 1u;
+            }
+
+
+            /* Wait until HIGH ends */
+            timeout = 0u;
+
+            while (DHT_DATA_Read() != 0u)
+            {
+                CyDelayUs(1u);
+
+                if (++timeout > 100u)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+
+    CyExitCriticalSection(irqState);
+
+
+    /* -------------------------
+       Check checksum
+       ------------------------- */
+
+    if ((uint8_t)(data[0] +
+                  data[1] +
+                  data[2] +
+                  data[3]) != data[4])
+    {
+        return 0u;
+    }
+
+
+    /* Humidity × 10 */
+    *humidity10 =
+        ((uint16)data[0] << 8) |
+        data[1];
+
+
+    /* Temperature × 10 */
+    {
+        uint16 rawTemperature;
+
+        rawTemperature =
+            ((uint16)data[2] << 8) |
+            data[3];
+
+        if ((rawTemperature & 0x8000u) != 0u)
+        {
+            rawTemperature &= 0x7FFFu;
+
+            *temperature10 =
+                -(int16)rawTemperature;
+        }
+        else
+        {
+            *temperature10 =
+                (int16)rawTemperature;
+        }
+    }
+
+    return 1u;
+}
+
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+int main(void)
+{
+    uint16 pot_mV;
+
+    int16 temperature10 = 0;
+    uint16 humidity10 = 0;
+
+    uint8 dhtOK;
+
+
+    CyGlobalIntEnable;
+
+
+    /* ADC */
+    ADC_Start();
+
+
+    /* DHT22 */
+    DHT_DATA_SetDriveMode(DHT_DATA_DM_OD_LO);
+    DHT_DATA_Write(1u);
+
+
+    /* CAN */
+    CAN_1_Start();
+
+
+    /* Wait for DHT22 startup */
+    CyDelay(2000u);
+
+
+    while (1)
+    {
+        /* =================================================
+           POTENTIOMETER
+           ================================================= */
+
+        pot_mV =
+            ADC_ReadResult_mVolts(0u);
+
+
+        CAN_1_TX_DATA_BYTE1(
+            CAN_1_TX_MAILBOX_Potdata,
+            (uint8)(pot_mV >> 8)
+        );
+
+        CAN_1_TX_DATA_BYTE2(
+            CAN_1_TX_MAILBOX_Potdata,
+            (uint8)(pot_mV & 0xFFu)
+        );
+
+        CAN_1_TX_DATA_BYTE3(
+            CAN_1_TX_MAILBOX_Potdata, 0u);
+
+        CAN_1_TX_DATA_BYTE4(
+            CAN_1_TX_MAILBOX_Potdata, 0u);
+
+        CAN_1_TX_DATA_BYTE5(
+            CAN_1_TX_MAILBOX_Potdata, 0u);
+
+        CAN_1_TX_DATA_BYTE6(
+            CAN_1_TX_MAILBOX_Potdata, 0u);
+
+        CAN_1_TX_DATA_BYTE7(
+            CAN_1_TX_MAILBOX_Potdata, 0u);
+
+        CAN_1_TX_DATA_BYTE8(
+            CAN_1_TX_MAILBOX_Potdata, 0u);
+
+        CAN_1_SendMsgPotdata();
+
+
+        /* =================================================
+           DHT22
+           ================================================= */
+
+        dhtOK =
+            DHT22_Read(
+                &temperature10,
+                &humidity10
+            );
+
+
+        /* =================================================
+           ALWAYS SEND 0x101
+           ================================================= */
+
+        if (dhtOK != 0u)
+        {
+            /* Real DHT data */
+
+            CAN_1_TX_DATA_BYTE1(
+                CAN_1_TX_MAILBOX_DHTdata,
+                (uint8)(((uint16)temperature10) >> 8)
+            );
+
+            CAN_1_TX_DATA_BYTE2(
+                CAN_1_TX_MAILBOX_DHTdata,
+                (uint8)((uint16)temperature10 & 0xFFu)
+            );
+
+            CAN_1_TX_DATA_BYTE3(
+                CAN_1_TX_MAILBOX_DHTdata,
+                (uint8)(humidity10 >> 8)
+            );
+
+            CAN_1_TX_DATA_BYTE4(
+                CAN_1_TX_MAILBOX_DHTdata,
+                (uint8)(humidity10 & 0xFFu)
+            );
+
+            /* 0xA5 = DHT READ OK */
+            CAN_1_TX_DATA_BYTE5(
+                CAN_1_TX_MAILBOX_DHTdata,
+                0xA5u
+            );
+        }
+        else
+        {
+            /*
+             * DHT READ FAILED
+             *
+             * Send zeros + 0x00
+             */
+            CAN_1_TX_DATA_BYTE1(
+                CAN_1_TX_MAILBOX_DHTdata,
+                0x00u
+            );
+
+            CAN_1_TX_DATA_BYTE2(
+                CAN_1_TX_MAILBOX_DHTdata,
+                0x00u
+            );
+
+            CAN_1_TX_DATA_BYTE3(
+                CAN_1_TX_MAILBOX_DHTdata,
+                0x00u
+            );
+
+            CAN_1_TX_DATA_BYTE4(
+                CAN_1_TX_MAILBOX_DHTdata,
+                0x00u
+            );
+
+            /* 0x00 = DHT READ FAILED */
+            CAN_1_TX_DATA_BYTE5(
+                CAN_1_TX_MAILBOX_DHTdata,
+                0x00u
+            );
+        }
+
+
+        /* Remaining bytes */
+        CAN_1_TX_DATA_BYTE6(
+            CAN_1_TX_MAILBOX_DHTdata, 0u);
+
+        CAN_1_TX_DATA_BYTE7(
+            CAN_1_TX_MAILBOX_DHTdata, 0u);
+
+        CAN_1_TX_DATA_BYTE8(
+            CAN_1_TX_MAILBOX_DHTdata, 0u);
+
+
+        /* Send DHT CAN frame */
+        CAN_1_SendMsgDHTdata();
+
+
+        /*
+         * DHT22 update interval
+         */
+        CyDelay(2000u);
+    }
+}
