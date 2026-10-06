@@ -92,9 +92,9 @@ The PSoC acts as the **CAN Master**, acquiring sensor data and transmitting it o
 
 ```bash
 git clone https://github.com/logeshfg/PSoC-4100s-Plus-CAN-Communication.git
-cd PSoC-4100s-Plus-CAN-Communication```
+cd PSoC-4100s-Plus-CAN-Communication
 
-
+```
 
 
 
