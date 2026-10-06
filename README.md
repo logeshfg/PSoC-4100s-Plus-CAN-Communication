@@ -45,5 +45,5 @@
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/CAN-Bus-MultiNode-Project.git
-   cd CAN-Bus-MultiNode-Project
+   [git clone https://github.com/your-username/CAN-Bus-MultiNode-Project.git
+   cd CAN-Bus-MultiNode-Project](https://github.com/logeshfg/PSoC-4100s-Plus-CAN-Communication.git)
