@@ -98,23 +98,16 @@ cd PSoC-4100s-Plus-CAN-Communication
 
 
 
-### 📌 Steps to Add It to Your GitHub Repo
+████████╗██╗  ██╗ █████╗ ███╗   ██╗██╗  ██╗    ██╗   ██╗ ██████╗ ██╗   ██╗
+╚══██╔══╝██║  ██║██╔══██╗████╗  ██║██║ ██╔╝    ╚██╗ ██╔╝██╔═══██╗██║   ██║
+   ██║   ███████║███████║██╔██╗ ██║█████╔╝      ╚████╔╝ ██║   ██║██║   ██║
+   ██║   ██╔══██║██╔══██║██║╚██╗██║██╔═██╗       ╚██╔╝  ██║   ██║██║   ██║
+   ██║   ██║  ██║██║  ██║██║ ╚████║██║  ██╗       ██║   ╚██████╔╝╚██████╔╝
+   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝       ╚═╝    ╚═════╝  ╚═════╝
 
-1. Go to **https://github.com/logeshfg/PSoC-4100s-Plus-CAN-Communication**
-2. Click **Add file → Create new file**
-3. Name it **`README.md`**
-4. Paste the content above
-5. Scroll to bottom → **Commit new file**
 
-### 🔧 Fixes I Made to Your Original
 
-- ✅ Fixed the broken `git clone` line (was malformed with `git clone: (url)`)
-- ✅ Added proper indentation to nested list items
-- ✅ Converted plain text tables into proper **Markdown tables**
-- ✅ Added missing formatting (code blocks, badges, emojis)
-- ✅ Fixed section headers (##, ###) so GitHub renders them correctly
-- ✅ Added the correct repo URL from your message
-- ✅ Added a proper **Author** section with your GitHub handle (`logeshfg`)
-- ✅ Wrapped everything in a single copy-paste block
 
-**➡️ Copy the entire markdown block into your `README.md` file and commit. If you want to add more sections (like a demo video embed or code explanation), let me know.**
+  
+  
+   
