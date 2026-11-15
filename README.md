@@ -4,7 +4,7 @@ A Classical CAN 2.0B communication project using a **PSoC 4100S Plus as the CAN 
 
 ---
 
-## 📌 Project Overview
+## <img src="https://img.icons8.com/?size=100&id=58808&format=png&color=FA5252" width="25"> Project Overview
 
 This project demonstrates **multi-node CAN communication** between a PSoC 4100S Plus and two ESP32 boards.
 
