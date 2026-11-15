@@ -78,7 +78,7 @@ The PSoC acts as the **CAN Master**, acquiring sensor data and transmitting it o
 
 ---
 
-## 🚀 Getting Started
+## <img src="https://img.icons8.com/?size=100&id=ScGO4VqzFG8v&format=png&color=FA5252" width="25"> Getting Started
 
 ### Prerequisites
 - PSoC Creator 4.4 installed
