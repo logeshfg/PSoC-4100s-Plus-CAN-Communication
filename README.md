@@ -48,7 +48,7 @@ The PSoC acts as the **CAN Master**, acquiring sensor data and transmitting it o
 
 ---
 
-## ⚙️ How It Works
+## <img src="https://img.icons8.com/?size=100&id=8801&format=png&color=FA5252" width="25"> How It Works
 
 ### 1. Sensor Reading (PSoC Master)
 - **Potentiometer (P3[5]):** Analog voltage sampled by a 12-bit SAR ADC → value 0–4095
